@@ -139,7 +139,8 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	return time.Unix(int64(value), 64), nil
+	// 小数点は切り捨ててしまう
+	return time.Unix(int64(value), 0), nil
 }
 
 func postMessage(webhookURL string, message string) error {
