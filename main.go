@@ -124,7 +124,9 @@ func main() {
 				Permalink: sm.Permalink,
 			}
 			if !config.Debug {
-				postMessage(config.WebhookURL, message.String())
+				if err := postMessage(config.WebhookURL, message.String()); err != nil {
+					log.Fatalf("err = %s", err.Error())
+				}
 			} else {
 				fmt.Println(message)
 			}
