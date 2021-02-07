@@ -48,7 +48,7 @@ func (m Message) String() string {
 	return fmt.Sprintf(":eyes: キーワード %s に関する発言が #%s でありました\n%s", m.Keyword, m.Channel, m.Permalink)
 }
 
-func readConfig() Config {
+func readEnv() Config {
 	slackToken := os.Getenv(SlackToken)
 	if len(slackToken) == 0 {
 		log.Fatalf("%s is empty. must be not empty.", SlackToken)
@@ -92,7 +92,7 @@ func readConfig() Config {
 }
 
 func main() {
-	config := readConfig()
+	config := readEnv()
 	threshold := time.Now().Add(time.Hour * -time.Duration(3600*config.DurationHours))
 	older := func(sm slack.SearchMessage) bool {
 		timestamp, err := parseTimestamp(sm.Timestamp)
