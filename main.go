@@ -48,49 +48,6 @@ func (m Message) String() string {
 	return fmt.Sprintf(":eyes: キーワード %s に関する発言が #%s でありました\n%s", m.Keyword, m.Channel, m.Permalink)
 }
 
-func readEnv() Config {
-	slackToken := os.Getenv(SlackToken)
-	if len(slackToken) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", SlackToken)
-	}
-	webhookURL := os.Getenv(WebhookURL)
-	if len(webhookURL) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", WebhookURL)
-	}
-	keywords := strings.Split(os.Getenv(Keywords), ",")
-	if len(keywords) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", Keywords)
-	}
-	maxSearchCount := 20
-	if len(os.Getenv(MaxSearchCount)) != 0 {
-		value, err := strconv.Atoi(os.Getenv(MaxSearchCount))
-		if err != nil {
-			log.Fatalf("err = %s", err.Error())
-		}
-		maxSearchCount = value
-	}
-	durationHours := 24
-	if len(os.Getenv(DurationHours)) != 0 {
-		value, err := strconv.Atoi(os.Getenv(DurationHours))
-		if err != nil {
-			log.Fatalf("err = %s", err.Error())
-		}
-		durationHours = value
-	}
-	debug := false
-	if len(os.Getenv(Debug)) != 0 {
-		debug = true
-	}
-	return Config{
-		SlackToken:     slackToken,
-		WebhookURL:     webhookURL,
-		Keywords:       keywords,
-		MaxSearchCount: maxSearchCount,
-		DurationHours:  durationHours,
-		Debug:          debug,
-	}
-}
-
 func main() {
 	config := readEnv()
 	threshold := time.Now().Add(time.Hour * -time.Duration(3600*config.DurationHours))
@@ -131,6 +88,49 @@ func main() {
 				fmt.Println(message)
 			}
 		}
+	}
+}
+
+func readEnv() Config {
+	slackToken := os.Getenv(SlackToken)
+	if len(slackToken) == 0 {
+		log.Fatalf("%s is empty. must be not empty.", SlackToken)
+	}
+	webhookURL := os.Getenv(WebhookURL)
+	if len(webhookURL) == 0 {
+		log.Fatalf("%s is empty. must be not empty.", WebhookURL)
+	}
+	keywords := strings.Split(os.Getenv(Keywords), ",")
+	if len(keywords) == 0 {
+		log.Fatalf("%s is empty. must be not empty.", Keywords)
+	}
+	maxSearchCount := 20
+	if len(os.Getenv(MaxSearchCount)) != 0 {
+		value, err := strconv.Atoi(os.Getenv(MaxSearchCount))
+		if err != nil {
+			log.Fatalf("err = %s", err.Error())
+		}
+		maxSearchCount = value
+	}
+	durationHours := 24
+	if len(os.Getenv(DurationHours)) != 0 {
+		value, err := strconv.Atoi(os.Getenv(DurationHours))
+		if err != nil {
+			log.Fatalf("err = %s", err.Error())
+		}
+		durationHours = value
+	}
+	debug := false
+	if len(os.Getenv(Debug)) != 0 {
+		debug = true
+	}
+	return Config{
+		SlackToken:     slackToken,
+		WebhookURL:     webhookURL,
+		Keywords:       keywords,
+		MaxSearchCount: maxSearchCount,
+		DurationHours:  durationHours,
+		Debug:          debug,
 	}
 }
 
