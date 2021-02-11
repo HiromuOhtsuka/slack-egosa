@@ -50,7 +50,7 @@ func (m Message) String() string {
 
 func main() {
 	config := readEnv()
-	threshold := time.Now().Add(time.Hour * -time.Duration(3600*config.DurationHours))
+	threshold := time.Now().Add(-time.Duration(3600*config.DurationHours) * time.Second)
 	older := func(sm slack.SearchMessage) bool {
 		timestamp, err := parseTimestamp(sm.Timestamp)
 		if err != nil {
