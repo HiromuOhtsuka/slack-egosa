@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -54,7 +53,7 @@ func main() {
 	older := func(sm slack.SearchMessage) bool {
 		timestamp, err := parseTimestamp(sm.Timestamp)
 		if err != nil {
-			log.Fatalf("err = %s", err.Error())
+			panic(err)
 		}
 		return timestamp.Before(threshold)
 	}
@@ -69,7 +68,7 @@ func main() {
 			Page:          1,
 		})
 		if err != nil {
-			log.Fatalf("err = %s", err.Error())
+			panic(err)
 		}
 		for _, sm := range slackMessages.Matches {
 			if older(sm) {
@@ -82,7 +81,7 @@ func main() {
 			}
 			if !config.Debug {
 				if err := postMessage(config.WebhookURL, message.String()); err != nil {
-					log.Fatalf("err = %s", err.Error())
+					panic(err)
 				}
 			} else {
 				fmt.Println(message)
@@ -94,21 +93,21 @@ func main() {
 func readEnv() Config {
 	slackToken := os.Getenv(SlackToken)
 	if len(slackToken) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", SlackToken)
+		panic(SlackToken + " is empty. must be not empty.")
 	}
 	webhookURL := os.Getenv(WebhookURL)
 	if len(webhookURL) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", WebhookURL)
+		panic(WebhookURL + " is empty. must be not empty.")
 	}
 	keywords := strings.Split(os.Getenv(Keywords), ",")
 	if len(keywords) == 0 {
-		log.Fatalf("%s is empty. must be not empty.", Keywords)
+		panic(Keywords + " is empty. must be not empty.")
 	}
 	maxSearchCount := 20
 	if len(os.Getenv(MaxSearchCount)) != 0 {
 		value, err := strconv.Atoi(os.Getenv(MaxSearchCount))
 		if err != nil {
-			log.Fatalf("err = %s", err.Error())
+			panic(err)
 		}
 		maxSearchCount = value
 	}
@@ -116,7 +115,7 @@ func readEnv() Config {
 	if len(os.Getenv(DurationHours)) != 0 {
 		value, err := strconv.Atoi(os.Getenv(DurationHours))
 		if err != nil {
-			log.Fatalf("err = %s", err.Error())
+			panic(err)
 		}
 		durationHours = value
 	}
