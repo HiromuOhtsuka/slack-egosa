@@ -25,16 +25,22 @@ const (
 	MaxSearchCount = "MAX_SEARCH_COUNT"
 	// Default: 24
 	DurationHours = "DURATION_HOURS"
-	Debug         = "DEBUG"
+	// 検索から除外するチャンネルのリスト
+	ExcludeChannels = "EXCLUDE_CHANNELS"
+	// 検索から除外するユーザのリスト
+	ExcludeUsers = "EXCLUDE_USERS"
+	Debug        = "DEBUG"
 )
 
 type Config struct {
-	SlackToken     string
-	WebhookURL     string
-	Keywords       []string
-	MaxSearchCount int
-	DurationHours  int
-	Debug          bool
+	SlackToken      string
+	WebhookURL      string
+	Keywords        []string
+	MaxSearchCount  int
+	DurationHours   int
+	ExcludeChannels []string
+	ExcludeUsers    []string
+	Debug           bool
 }
 
 type Message struct {
@@ -72,6 +78,22 @@ func main() {
 		}
 		for _, sm := range slackMessages.Matches {
 			if older(sm) {
+				continue
+			}
+			if containsArray(sm.Channel.Name, config.ExcludeChannels) {
+				continue
+			}
+			if len(sm.User) == 0 {
+				continue
+			}
+			if containsArray(sm.Username, config.ExcludeUsers) {
+				continue
+			}
+			userinfo, err := api.GetUserInfo(sm.User)
+			if err != nil {
+				panic(err)
+			}
+			if userinfo.IsBot || userinfo.IsAppUser {
 				continue
 			}
 			message := Message{
@@ -119,17 +141,21 @@ func readEnv() Config {
 		}
 		durationHours = value
 	}
+	excludeChannels := strings.Split(os.Getenv(ExcludeChannels), ",")
+	excludeUsers := strings.Split(os.Getenv(ExcludeUsers), ",")
 	debug := false
 	if len(os.Getenv(Debug)) != 0 {
 		debug = true
 	}
 	return Config{
-		SlackToken:     slackToken,
-		WebhookURL:     webhookURL,
-		Keywords:       keywords,
-		MaxSearchCount: maxSearchCount,
-		DurationHours:  durationHours,
-		Debug:          debug,
+		SlackToken:      slackToken,
+		WebhookURL:      webhookURL,
+		Keywords:        keywords,
+		MaxSearchCount:  maxSearchCount,
+		DurationHours:   durationHours,
+		ExcludeChannels: excludeChannels,
+		ExcludeUsers:    excludeUsers,
+		Debug:           debug,
 	}
 }
 
@@ -154,4 +180,13 @@ func postMessage(webhookURL string, message string) error {
 		return fmt.Errorf("StatusCode = %d. not 200.", resp.StatusCode())
 	}
 	return nil
+}
+
+func containsArray(element string, array []string) bool {
+	for _, e := range array {
+		if e == element {
+			return true
+		}
+	}
+	return false
 }
